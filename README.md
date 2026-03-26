@@ -1,6 +1,6 @@
-# Python 3D Rendering Basics (Kid-Friendly)
+# Python 3D Rendering Basics
 
-This folder contains six self-contained mini lessons that build from 2D points to a rotating 3D wireframe cube using minimal libraries.
+Self-contained mini lessons that build from 2D points to a rotating 3D wireframe cube.
 
 ## Requirements
 
@@ -19,16 +19,19 @@ This folder contains six self-contained mini lessons that build from 2D points t
    Vectors as arrows and vector length.
 
 3. `lesson3_rotation_2d.py`  
-   2D rotation matrix applied to a shape.
+   2D rotation applied to a shape.
 
 4. `lesson4_rotate_3d_points.py`  
-   3D point tuples and X/Y axis rotations (printed output).
+   3D point tuples and X/Y axis rotations.
 
 5. `lesson5_projection.py`  
    Perspective projection from 3D points to 2D screen.
 
 6. `lesson6_wireframe_cube.py`  
-   End-to-end 3D pipeline: transform, project, draw.
+   A wireframe cube rotating in 3D with some buttons to toggle rotations.
+
+7. `lesson7_line_pixels.py`  
+   Draw lines by plotting one pixel at a time (no built-in line draw call).
 
 ## Install
 
@@ -47,18 +50,19 @@ python3 -m pip install pygame
 ## How To Run
 
 From this folder:
-
+```bash
 python lesson1_points.py
 python lesson2_vectors.py
 python lesson3_rotation_2d.py
 python lesson4_rotate_3d_points.py
 python lesson5_projection.py
 python lesson6_wireframe_cube.py
-
+python lesson7_line_pixels.py
+```
 
 If `python` points to Python 2 on your machine, use:
 
-
+```bash
 python3 lesson1_points.py
-
+```
 
