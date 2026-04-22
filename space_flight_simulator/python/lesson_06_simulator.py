@@ -60,7 +60,7 @@ font_lg = pygame.font.SysFont("Courier New", 14)
 
 CX, CY       = WIDTH // 2, HEIGHT // 2
 FOCAL_LENGTH = 500
-NEAR_CLIP    = 2.0
+NEAR_CLIP    = 5.0    # raised from 2 — prevents extreme scale values when very close to a planet
 
 THRUST_ACCEL = 90     # units/sec²
 TURN_SPEED   = 1.2    # radians/sec
@@ -160,9 +160,14 @@ def draw_planet(sx, sy, r, base_col, glow_col):
     """Draw a planet as a filled circle with a soft glow halo."""
     sx, sy, r = int(sx), int(sy), max(1, int(r))
 
+    # Cap r so we never allocate a surface larger than the window.
+    # Without this cap, a planet at depth just above NEAR_CLIP produces
+    # r in the tens-of-thousands, and pygame.Surface((huge, huge)) crashes.
+    r = min(r, HEIGHT)
+
     # Glow halo (larger, transparent Surface so alpha works)
     if r > 3:
-        glow_r   = int(r * 1.8)
+        glow_r   = min(int(r * 1.8), HEIGHT)   # also capped for safety
         glow_dia = glow_r * 2
         glow_surf = pygame.Surface((glow_dia, glow_dia), pygame.SRCALPHA)
         # Draw concentric circles fading out — approximates a radial gradient
@@ -176,11 +181,12 @@ def draw_planet(sx, sy, r, base_col, glow_col):
     # Planet disk
     pygame.draw.circle(screen, base_col, (sx, sy), r)
 
-    # Subtle highlight on upper-left (fake lighting — directional from upper left)
+    # Subtle highlight on upper-left (fake lighting)
     if r > 5:
-        hi_surf = pygame.Surface((r*2, r*2), pygame.SRCALPHA)
-        pygame.draw.circle(hi_surf, (255, 255, 255, 35), (r//2, r//2), r)
-        screen.blit(hi_surf, (sx - r, sy - r))
+        hi_r    = min(r, HEIGHT // 2)   # capped for safety
+        hi_surf = pygame.Surface((hi_r * 2, hi_r * 2), pygame.SRCALPHA)
+        pygame.draw.circle(hi_surf, (255, 255, 255, 35), (hi_r // 2, hi_r // 2), hi_r)
+        screen.blit(hi_surf, (sx - hi_r, sy - hi_r))
 
 
 # ============================================================
