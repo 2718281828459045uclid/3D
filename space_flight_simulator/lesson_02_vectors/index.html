@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 2 — Vectors</title>
+  <link rel="stylesheet" href="../common.css">
+</head>
+<body>
+
+<nav>
+  <a href="../lesson_01_canvas/index.html">← Lesson 1</a>
+  <a href="../index.html">Index</a>
+  <a href="../lesson_03_projection/index.html">Lesson 3 →</a>
+</nav>
+
+<h1>Lesson 2 — Vectors: The Language of Movement</h1>
+
+<div class="card">
+  <span class="label">What Is a Vector?</span><br>
+  A vector is a value with both <strong>magnitude</strong> (size) and <strong>direction</strong>.
+  In 3D we write it as three numbers: <code>(x, y, z)</code>. Vectors can represent:
+  <ul>
+    <li><strong>Position</strong> — "the planet is at (200, −50, 400)"</li>
+    <li><strong>Velocity</strong> — "the ship moves 80 units/sec forward, 20 units/sec right"</li>
+    <li><strong>Direction</strong> — "the ship faces this way" (a unit vector, length = 1)</li>
+    <li><strong>Force/Thrust</strong> — "apply 100 N of thrust in this direction"</li>
+  </ul>
+  We build a <code>Vec3</code> class here and reuse it unchanged through Lesson 6.
+</div>
+
+<div class="card">
+  <span class="label">Controls (2D demo — z stays 0 for now)</span><br>
+  <kbd>W</kbd> thrust up &nbsp; <kbd>S</kbd> thrust down &nbsp;
+  <kbd>A</kbd> thrust left &nbsp; <kbd>D</kbd> thrust right &nbsp;
+  <kbd>Space</kbd> cut engines<br>
+  <span class="dim">Notice: releasing keys keeps the ship drifting. Zero gravity — no friction. Newton's 1st law.</span>
+</div>
+
+<canvas id="canvas" width="700" height="460"></canvas>
+
+<div class="card">
+  <span class="label">The Dot Product — "How Aligned Are Two Vectors?"</span><br>
+  <code>dot(a, b) = a.x·b.x + a.y·b.y + a.z·b.z</code><br>
+  When both vectors are unit vectors (length = 1), the result equals cos(angle between them):<br>
+  &nbsp; dot = <strong>+1</strong> → same direction &nbsp;
+  &nbsp; dot = &nbsp;<strong>0</strong> → perpendicular &nbsp;
+  &nbsp; dot = <strong>−1</strong> → opposite<br>
+  The HUD shows the dot product of your velocity against the direction to the nearest planet —
+  positive means you're heading toward it.
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>

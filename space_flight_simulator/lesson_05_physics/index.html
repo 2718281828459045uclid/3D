@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 5 — Thrust &amp; Physics</title>
+  <link rel="stylesheet" href="../common.css">
+</head>
+<body>
+
+<nav>
+  <a href="../lesson_04_camera/index.html">← Lesson 4</a>
+  <a href="../index.html">Index</a>
+  <a href="../lesson_06_simulator/index.html">Lesson 6 →</a>
+</nav>
+
+<h1>Lesson 5 — Thrust and Physics</h1>
+
+<div class="card">
+  <span class="label">Newton's Laws in Zero Gravity</span><br>
+  <strong>1st law:</strong> an object in motion stays in motion — in space there's no air friction,
+  so once you're moving, you keep moving forever unless you apply a reverse thrust.<br>
+  <strong>2nd law:</strong> F = m·a — force equals mass times acceleration.
+  Since we treat the ship's mass as 1, force and acceleration are the same thing.
+  Pressing a thrust key adds to <em>acceleration</em>, not directly to velocity.
+</div>
+
+<div class="card">
+  <span class="label">Thrust Applies Acceleration, Not Velocity</span><br>
+  Here's the key difference from Lesson 2:<br>
+  <code>acceleration += thrustDirection × THRUST_FORCE</code> &nbsp; (while key held)<br>
+  <code>velocity += acceleration × dt</code> &nbsp; (every frame — integrating acceleration)<br>
+  <code>position += velocity × dt</code> &nbsp; (every frame — integrating velocity)<br>
+  This two-step integration (Euler integration) is the foundation of all game physics engines.
+  Thrust direction comes from the camera's local <code>forward</code> and <code>right</code> vectors,
+  so WASD pushes you in whatever direction you're facing.
+</div>
+
+<div class="card">
+  <span class="label">Controls</span><br>
+  <kbd>W</kbd> / <kbd>S</kbd> thrust forward / backward &nbsp;
+  <kbd>A</kbd> / <kbd>D</kbd> thrust left / right<br>
+  <kbd>↑</kbd> / <kbd>↓</kbd> pitch &nbsp; <kbd>←</kbd> / <kbd>→</kbd> yaw<br>
+  <span class="dim">Watch the speed readout climb as you hold a key, then persist after releasing.</span>
+</div>
+
+<canvas id="canvas" width="700" height="460"></canvas>
+
+<script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 3 — 3D Projection</title>
+  <link rel="stylesheet" href="../common.css">
+</head>
+<body>
+
+<nav>
+  <a href="../lesson_02_vectors/index.html">← Lesson 2</a>
+  <a href="../index.html">Index</a>
+  <a href="../lesson_04_camera/index.html">Lesson 4 →</a>
+</nav>
+
+<h1>Lesson 3 — 3D Perspective Projection</h1>
+
+<div class="card">
+  <span class="label">Three Coordinate Spaces</span><br>
+  Going from a 3D world to pixels on screen involves three spaces:<br>
+  &nbsp; 1. <strong>World space</strong> — where objects live (x, y, z in the game world)<br>
+  &nbsp; 2. <strong>Camera space</strong> — coordinates relative to the camera (introduced in Lesson 4)<br>
+  &nbsp; 3. <strong>Screen space</strong> — 2D pixel coordinates on the canvas<br>
+  In this lesson the camera is fixed at the origin looking down +Z, so world space and
+  camera space are identical. That keeps the math simple.
+</div>
+
+<div class="card">
+  <span class="label">The Projection Formula</span><br>
+  Perspective works because things farther away subtend a smaller angle.
+  A planet at distance z looks <code>1/z</code> as large as it would at distance 1.<br><br>
+  <code>screenX = (worldX / worldZ) × focalLength + canvasCenterX</code><br>
+  <code>screenY = (−worldY / worldZ) × focalLength + canvasCenterY</code><br><br>
+  The <strong>focalLength</strong> (≈ canvas half-width / tan(halfFOV)) controls field of view.
+  Larger = narrower view. We negate worldY because screen-Y increases downward.
+  This is exactly what a <em>projection matrix</em> does in OpenGL/WebGL — just written out by hand.
+</div>
+
+<div class="card">
+  <span class="label">Depth Sorting — The Painter's Algorithm</span><br>
+  We can't draw planets in any order: a close planet must cover a far one.
+  The simplest fix: sort by depth (Z) from farthest to nearest and draw in that order,
+  so each new planet paints over anything behind it. This is called the "painter's algorithm."
+  (Real engines use a <em>depth buffer</em>, but the painter's algorithm is perfect for spheres.)
+</div>
+
+<canvas id="canvas" width="700" height="460"></canvas>
+
+<div class="card">
+  <span class="label">Apparent Radius</span><br>
+  A planet with world-radius <code>R</code> at depth <code>z</code> appears on screen as a
+  circle with radius <code>(R / z) × focalLength</code> pixels. Same division-by-depth idea —
+  farther away = smaller circle. We draw the planet using this apparent radius.
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>

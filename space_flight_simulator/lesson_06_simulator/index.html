@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 6 — Flight Simulator</title>
+  <link rel="stylesheet" href="../common.css">
+  <style>
+    /* Extra style: canvas gets a crosshair cursor */
+    canvas { cursor: none; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="../lesson_05_physics/index.html">← Lesson 5</a>
+  <a href="../index.html">Index</a>
+</nav>
+
+<h1>Lesson 6 — Complete Flight Simulator</h1>
+
+<div class="card">
+  <span class="label">Everything Together</span><br>
+  This is the full flight simulator built from all six lessons:
+  canvas drawing, vectors, perspective projection, camera orientation, and Newtonian physics.
+  Every piece of code here you've already seen — this lesson just assembles them cleanly.
+</div>
+
+<div class="card">
+  <span class="label">Controls</span><br>
+  <kbd>W</kbd> / <kbd>S</kbd> thrust forward / backward &nbsp;&nbsp;
+  <kbd>A</kbd> / <kbd>D</kbd> thrust left / right<br>
+  <kbd>↑</kbd> / <kbd>↓</kbd> pitch up / down &nbsp;&nbsp;
+  <kbd>←</kbd> / <kbd>→</kbd> yaw left / right<br>
+  <kbd>Space</kbd> emergency brake (dampens velocity — not physically realistic, handy for demos)
+</div>
+
+<canvas id="canvas" width="700" height="500"></canvas>
+
+<div class="card">
+  <span class="label">Where to Go From Here</span><br>
+  <ul>
+    <li>Add <strong>roll</strong> (Q/E keys, rotate around the forward axis)</li>
+    <li>Add <strong>gravity</strong> — planets pull the ship toward them (Newton's law of gravitation)</li>
+    <li>Add a <strong>depth buffer</strong> to handle non-spherical geometry correctly</li>
+    <li>Move to <strong>WebGL</strong> or a game engine (Unity, Godot) for GPU-accelerated rendering</li>
+    <li>Add a <strong>minimap</strong> (a top-down 2D view of all planet positions)</li>
+  </ul>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>

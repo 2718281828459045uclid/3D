@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 4 — Camera Orientation</title>
+  <link rel="stylesheet" href="../common.css">
+</head>
+<body>
+
+<nav>
+  <a href="../lesson_03_projection/index.html">← Lesson 3</a>
+  <a href="../index.html">Index</a>
+  <a href="../lesson_05_physics/index.html">Lesson 5 →</a>
+</nav>
+
+<h1>Lesson 4 — Camera Orientation: Pitch and Yaw</h1>
+
+<div class="card">
+  <span class="label">Euler Angles</span><br>
+  We describe the camera's rotation with two angles:
+  <ul>
+    <li><strong>Yaw</strong> — rotation around the world Y axis (looking left/right)</li>
+    <li><strong>Pitch</strong> — rotation around the camera's local X axis (looking up/down)</li>
+  </ul>
+  We skip <em>roll</em> (tilting sideways) — that keeps the math simple and matches how
+  flight simulators work. Together, yaw and pitch define every direction you can look
+  without rolling.
+</div>
+
+<div class="card">
+  <span class="label">Camera Basis Vectors</span><br>
+  From yaw and pitch we derive three unit vectors that define the camera's local frame:
+  <ul>
+    <li><strong>forward</strong> — the direction the camera is pointing</li>
+    <li><strong>right</strong> — 90° to the right of forward, in the horizontal plane</li>
+    <li><strong>up</strong> — perpendicular to both (points toward the sky)</li>
+  </ul>
+  These three vectors together are what a <em>view matrix</em> encodes in OpenGL.
+  Here we compute them directly from trigonometry, so you can see the math.
+</div>
+
+<div class="card">
+  <span class="label">World → Camera Transform</span><br>
+  To draw a world point, we first express it in the camera's local frame:
+  <code>camX = dot(right, point − cameraPos)</code><br>
+  <code>camY = dot(up, point − cameraPos)</code><br>
+  <code>camZ = dot(forward, point − cameraPos)</code><br>
+  Taking the dot product with each axis projects the vector onto that axis —
+  the same operation as multiplying by the view matrix.
+  After this, <code>camZ</code> is depth and we use the same projection formula as Lesson 3.
+</div>
+
+<div class="card">
+  <span class="label">Controls</span><br>
+  <kbd>↑</kbd> pitch up &nbsp; <kbd>↓</kbd> pitch down &nbsp;
+  <kbd>←</kbd> yaw left &nbsp; <kbd>→</kbd> yaw right<br>
+  <span class="dim">Camera is still fixed at the origin — movement comes in Lesson 5.</span>
+</div>
+
+<canvas id="canvas" width="700" height="460"></canvas>
+
+<script src="main.js"></script>
+</body>
+</html>

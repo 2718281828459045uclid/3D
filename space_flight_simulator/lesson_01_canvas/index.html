@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 1 — Canvas &amp; Coordinates</title>
+  <link rel="stylesheet" href="../common.css">
+</head>
+<body>
+
+<nav>
+  <a href="../index.html">← Index</a>
+  <a href="../lesson_02_vectors/index.html">Lesson 2 →</a>
+</nav>
+
+<h1>Lesson 1 — The Canvas and Coordinates</h1>
+
+<div class="card">
+  <span class="label">The Canvas</span><br>
+  An HTML <code>&lt;canvas&gt;</code> element is a rectangle of pixels we can control from JavaScript.
+  We ask for a "2D rendering context" and get back an object with drawing commands:
+  <code>fillRect()</code>, <code>arc()</code>, <code>stroke()</code>, etc.
+  The browser handles turning those commands into pixels on screen.
+</div>
+
+<div class="card">
+  <span class="label">The Coordinate System</span><br>
+  Every pixel has an address <code>(x, y)</code>. The origin <code>(0, 0)</code> is the
+  <em>top-left</em> corner. <code>x</code> increases going <strong>right</strong>;
+  <code>y</code> increases going <strong>down</strong>. This is the opposite of math-class
+  coordinates where y goes up — keep that in mind for Lesson 3 when we enter 3D.
+  Move your mouse over the canvas to see live coordinates.
+</div>
+
+<canvas id="canvas" width="700" height="460"></canvas>
+
+<div class="card">
+  <span class="label">The Game Loop</span><br>
+  A game repeats three steps ~60 times per second:<br>
+  &nbsp; 1. <strong>Update</strong> — advance the world (move objects, check rules)<br>
+  &nbsp; 2. <strong>Draw</strong> — render everything to the canvas<br>
+  &nbsp; 3. <strong>Yield</strong> — hand control back; the browser calls us for the next frame<br>
+  <code>requestAnimationFrame(callback)</code> schedules our callback for the next frame.
+  It receives a <code>timestamp</code> in milliseconds.
+</div>
+
+<div class="card">
+  <span class="label">Delta Time (dt)</span><br>
+  <code>dt</code> = elapsed seconds since the last frame (~0.016 at 60 fps).
+  We multiply every movement by <code>dt</code> so the game runs at the same speed on fast
+  and slow machines. "Move 80 pixels per second" = move <code>80 × dt</code> pixels this frame.
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>
