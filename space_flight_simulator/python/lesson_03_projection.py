@@ -88,6 +88,7 @@ def project(world_x, world_y, world_z):
     Returns (sx, sy, scale) or None if the point is behind the camera.
     scale = FOCAL_LENGTH / world_z — how large things appear at this depth.
     """
+    # Clamp by near plane so division by tiny/negative depth is avoided.
     if world_z <= NEAR_CLIP:
         return None    # behind the camera — don't draw
 
@@ -178,6 +179,7 @@ while running:
     # Planets — PAINTER'S ALGORITHM:
     # Sort by depth descending (farthest first), draw in that order.
     # Each planet paints over whatever is behind it.
+    # This is a simple visibility strategy that works for opaque circles.
     sorted_planets = sorted(planets, key=lambda p: -p["pos"].z)
 
     for planet in sorted_planets:
@@ -190,6 +192,7 @@ while running:
 
         # Apparent radius:  world_radius / depth × focal_length
         # Same division-by-depth logic as the position projection.
+        # This keeps object proportions consistent as distance changes.
         apparent_radius = planet["radius"] * scale
         if apparent_radius < 0.5:
             continue    # too small to see

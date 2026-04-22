@@ -81,22 +81,75 @@ brake_flash = 0.0    # 0–1, decays each frame (visual only)
 # ============================================================
 # CAMERA MATH
 # ============================================================
+# Given the camera's current yaw and pitch, compute its forward, right, and up vectors.
+# These vectors represent the camera's orientation in 3D space:
+#   - forward: the direction the camera is looking
+#   - right:   the direction to the camera's right (used for strafing, x axis)
+#   - up:      the 'upward' direction from the camera's point of view (y axis)
+# This uses spherical coordinates math.
 def compute_camera_vectors(yaw, pitch):
+    # Compute cos/sin for yaw and pitch for later use
     cos_p, sin_p = math.cos(pitch), math.sin(pitch)
     cos_y, sin_y = math.cos(yaw),   math.sin(yaw)
+
+    # Forward vector (the direction the camera faces)
+    # X: horizontal movement (depends on yaw and pitch)
+    # Y: vertical movement (depends only on pitch)
+    # Z: forward/back movement (depends on yaw and pitch)
     forward = Vec3(cos_p * sin_y,  sin_p,         cos_p * cos_y)
+
+    # Right vector (perpendicular to forward, on the ground plane)
+    # X: right, horizontal (depends only on yaw)
+    # Z: right, horizontal (depends only on yaw)
     right   = Vec3(cos_y,          0.0,           -sin_y)
+
+    # Up vector (perpendicular to both forward and right, uses right-hand rule)
+    # Points 'up' from the camera's perspective
     up      = Vec3(-sin_p * sin_y, cos_p,         -sin_p * cos_y)
+
+    # Return three orthogonal direction vectors from the camera's perspective
     return forward, right, up
 
 
 def world_to_camera(world_point, cam_position, forward, right, up):
+    """
+    Convert a point from world coordinates into camera-local coordinates.
+
+    The camera basis vectors (`right`, `up`, `forward`) form the camera's local
+    axes. By subtracting camera position first, then dotting against those axes,
+    we express the point as:
+      x = how far right of camera
+      y = how far above camera
+      z = how far in front of camera
+    """
+    # Shift point into a frame centered at camera position.
     rel = world_point.sub(cam_position)
+    # Project onto camera basis to get camera-space coordinates.
     return Vec3(rel.dot(right), rel.dot(up), rel.dot(forward))
 
 
 def project(cam_point):
-    if cam_point.z <= NEAR_CLIP: return None
+    """
+    Projects a 3D point from camera space onto the 2D screen using perspective projection.
+
+    Arguments:
+        cam_point (Vec3): The 3D point in camera-relative coordinates.
+
+    Returns:
+        (sx, sy, scale): Tuple containing:
+            - sx: x-coordinate on the screen.
+            - sy: y-coordinate on the screen.
+            - scale: scale factor for sizing objects at this depth.
+        Returns None if the point is behind the camera's near clipping plane.
+
+    Explanation:
+      - If the point is closer than NEAR_CLIP (i.e., behind or too close to the camera), it won't be displayed.
+      - sx and sy are calculated by projecting the 3D coordinates onto the 2D screen using focal length and the screen's center (CX, CY).
+      - The y projection is flipped (negative sign) to match screen coordinates.
+      - scale gives a size scaling factor based on depth so objects farther away appear smaller.
+    """
+    if cam_point.z <= NEAR_CLIP:
+        return None
     sx    =  (cam_point.x / cam_point.z) * FOCAL_LENGTH + CX
     sy    = -(cam_point.y / cam_point.z) * FOCAL_LENGTH + CY
     scale =   FOCAL_LENGTH / cam_point.z
@@ -111,10 +164,15 @@ def project(cam_point):
 NUM_STARS = 300
 stars = []
 for _ in range(NUM_STARS):
+    # Uniformly sample a direction on a unit sphere:
+    # - theta: azimuth around vertical axis
+    # - phi: inclination from top pole
     theta = random.uniform(0, math.pi * 2)
     phi   = math.acos(random.uniform(-1, 1))
     stars.append({
+        # Direction only; stars are rendered as infinitely far points.
         "dir": Vec3(math.sin(phi)*math.cos(theta), math.sin(phi)*math.sin(theta), math.cos(phi)),
+        # Random brightness and size create depth variation.
         "b":   random.randint(100, 220),
         "s":   max(1, int(random.uniform(0.5, 1.8))),
     })
@@ -136,14 +194,18 @@ NAMES = ["Hydra","Ignis","Magna","Virid","Lutea","Ceres","Nebula","Ferro",
 
 planets = []
 for i in range(20):
+    # Cycle through color palette and names so each planet has identity.
     base_col, glow_col = PALETTE[i % len(PALETTE)]
     theta = random.uniform(0, math.pi * 2)
     phi   = math.acos(random.uniform(-1, 1))
+    # Planet distance from origin; broad range creates near/far objects.
     dist  = random.uniform(600, 4100)
     planets.append({
         "pos": Vec3(
+            # Compress Y axis slightly so world distribution feels flatter.
             math.sin(phi) * math.cos(theta) * dist,
             math.sin(phi) * math.sin(theta) * dist * 0.6,
+            # Offset forward so player starts facing into populated space.
             math.cos(phi) * dist + 800
         ),
         "radius":    random.uniform(20, 90),
@@ -194,12 +256,15 @@ def draw_planet(sx, sy, r, base_col, glow_col):
 # ============================================================
 running = True
 while running:
+    # Frame delta time in seconds keeps physics frame-rate independent.
     dt = clock.tick(60) / 1000.0
 
+    # Event queue handles app close and immediate escape exit.
     for event in pygame.event.get():
         if event.type == pygame.QUIT: running = False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE: running = False
 
+    # Snapshot keyboard state for continuous controls.
     keys = pygame.key.get_pressed()
 
     # ---- Rotation ----
@@ -209,6 +274,7 @@ while running:
     if keys[pygame.K_DOWN]:  cam_pitch -= TURN_SPEED * dt
     cam_pitch = max(-MAX_PITCH, min(MAX_PITCH, cam_pitch))
 
+    # Recompute camera basis vectors after any rotation this frame.
     forward, right, up = compute_camera_vectors(cam_yaw, cam_pitch)
 
     # ---- Thrust ----
@@ -225,6 +291,7 @@ while running:
         brake_flash *= 0.85
 
     # ---- Integrate ----
+    # Basic Euler integration: new position = old position + velocity * dt.
     cam_pos = cam_pos.add(cam_vel.scale(dt))
 
     # ---- Draw ----
@@ -232,8 +299,11 @@ while running:
 
     # Stars
     for star in stars:
+        # Rotate static star direction into camera view space via dot products.
         d = Vec3(star["dir"].dot(right), star["dir"].dot(up), star["dir"].dot(forward))
+        # Skip stars behind camera.
         if d.z <= 0: continue
+        # Perspective divide for screen projection.
         sx = (d.x / d.z) * FOCAL_LENGTH + CX
         sy = -(d.y / d.z) * FOCAL_LENGTH + CY
         if 0 <= sx < WIDTH and 0 <= sy < HEIGHT:
@@ -243,6 +313,7 @@ while running:
     # Nearest planet
     nearest, nearest_dist = None, float("inf")
     for p in planets:
+        # True Euclidean distance in world space to current camera position.
         d = p["pos"].sub(cam_pos).length()
         if d < nearest_dist:
             nearest_dist, nearest = d, p
@@ -250,16 +321,22 @@ while running:
     # Project and sort planets
     projected = []
     for planet in planets:
+        # Transform each planet center into camera coordinates.
         cam_pt = world_to_camera(planet["pos"], cam_pos, forward, right, up)
+        # Convert to 2D screen position + depth scale (or None if clipped).
         proj   = project(cam_pt)
         if proj:
+            # Keep depth so we can draw far-to-near for painter's algorithm.
             projected.append((cam_pt.z, planet, proj))
     projected.sort(reverse=True)    # farthest first
 
     for _, planet, (sx, sy, scale) in projected:
+        # Radius shrinks with distance due to perspective.
         r = planet["radius"] * scale
+        # Ignore subpixel planets to save draw calls.
         if r < 0.4: continue
         draw_planet(sx, sy, r, planet["base_col"], planet["glow_col"])
+        # Label only when planet is visually large enough to read.
         if r > 12:
             lbl = font.render(planet["name"], True, (190, 210, 255))
             screen.blit(lbl, (int(sx) - lbl.get_width()//2, int(sy) - int(r) - 14))
@@ -272,15 +349,18 @@ while running:
 
     # Brake flash overlay
     if brake_flash > 0.01:
+        # Full-screen transparent overlay that fades out exponentially.
         flash_surf = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
         flash_surf.fill((255, 80, 0, int(brake_flash * 35)))
         screen.blit(flash_surf, (0, 0))
+        # Optional center text at stronger flash levels.
         if brake_flash > 0.3:
             lbl = font_lg.render("BRAKING", True, (255, 80, 0))
             screen.blit(lbl, (CX - lbl.get_width()//2, CY + 28))
 
     # ---- HUD ----
     speed    = cam_vel.length()
+    # Used for HUD speed gauge normalization.
     MAX_SPEED = 500
 
     # Left panel — ship state
@@ -299,7 +379,9 @@ while running:
     bar_y = 12 + len(left_hud) * 16 + 18
     pygame.draw.rect(screen, (4, 8, 18), (12, bar_y, 240, 22))
     pygame.draw.rect(screen, (20, 40, 70), (20, bar_y + 6, 224, 8))
+    # Clamp fill to [0, 1] of bar width.
     fill_w = int(min(speed / MAX_SPEED, 1.0) * 224)
+    # Color transitions from green (slow) to red (fast).
     t      = min(speed / MAX_SPEED, 1.0)
     r_col  = int(min(t * 2, 1) * 255)
     g_col  = int(min((1 - t) * 2, 1) * 255)
@@ -309,6 +391,7 @@ while running:
 
     # Right panel — nearest planet
     if nearest:
+        # Switch units for readability at larger distances.
         dist_str = (f"{int(nearest_dist)} u" if nearest_dist < 10000
                     else f"{nearest_dist/1000:.1f} ku")
         right_hud = [
@@ -330,8 +413,10 @@ while running:
         lbl = font.render(text, True, (55, 75, 100))
         screen.blit(lbl, (20, ry + 6 + i * 16))
 
+    # Push final composed frame to display.
     pygame.display.flip()
 
 
+# Clean shutdown for pygame and Python process.
 pygame.quit()
 sys.exit()

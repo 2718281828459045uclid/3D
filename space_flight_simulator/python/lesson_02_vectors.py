@@ -133,6 +133,7 @@ def draw_arrow(surface, x1, y1, x2, y2, color, label=None):
     """Draw an arrow from (x1,y1) to (x2,y2) with an optional label."""
     dx, dy = x2 - x1, y2 - y1
     length = math.sqrt(dx*dx + dy*dy)
+    # Very short vectors are skipped to avoid noisy tiny arrowheads.
     if length < 3:
         return
     pygame.draw.line(surface, color, (int(x1), int(y1)), (int(x2), int(y2)), 2)
@@ -191,6 +192,8 @@ while running:
     # ---- Input ----
     keys = pygame.key.get_pressed()   # returns a bool array of every key state
 
+    # These inputs accelerate along world axes by directly changing velocity.
+    # Later lessons switch this to camera-relative thrust in 3D.
     if keys[pygame.K_w]: ship_vel.y += THRUST * dt   # world-y up = positive
     if keys[pygame.K_s]: ship_vel.y -= THRUST * dt
     if keys[pygame.K_a]: ship_vel.x -= THRUST * dt
@@ -232,6 +235,7 @@ while running:
         screen.blit(lbl, (px - lbl.get_width()//2, py - planet["radius"] - 16))
 
     # Direction vector to nearest planet (dashed line)
+    # Interpolation builds intermediate points between ship and target.
     np_sx, np_sy = world_to_screen(nearest["pos"].x, nearest["pos"].y)
     for t in range(0, 10):
         frac = t / 10
@@ -260,6 +264,7 @@ while running:
     if speed > 1:
         to_target  = nearest["pos"].sub(ship_pos).normalize()
         vel_dir    = ship_vel.normalize()
+        # Dot of two unit vectors measures directional alignment.
         dot_to_nearest = to_target.dot(vel_dir)
 
     hud_lines = [

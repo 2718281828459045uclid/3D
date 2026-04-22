@@ -96,6 +96,7 @@ def world_to_camera(world_point, cam_position, forward, right, up):
 
 
 def project(cam_point):
+    # Points too close/behind the camera are discarded before perspective divide.
     if cam_point.z <= NEAR_CLIP: return None
     sx    =  (cam_point.x / cam_point.z) * FOCAL_LENGTH + CX
     sy    = -(cam_point.y / cam_point.z) * FOCAL_LENGTH + CY
@@ -186,6 +187,7 @@ while running:
 
     # Stars (rotate with camera; stars are infinitely far so no position offset)
     for star in stars:
+        # Dotting by basis vectors rotates world direction into camera axes.
         cam_dir = Vec3(
             star["dir"].dot(right),
             star["dir"].dot(up),
@@ -203,6 +205,7 @@ while running:
         cam_pt = world_to_camera(planet["pos"], cam_pos, forward, right, up)
         proj   = project(cam_pt)
         if proj:
+            # Depth-first rendering avoids near planets being overdrawn by far ones.
             projected.append((cam_pt.z, planet, proj))
     projected.sort(reverse=True)
 

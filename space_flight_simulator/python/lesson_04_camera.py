@@ -122,6 +122,7 @@ def world_to_camera(world_point, forward, right, up):
       cam.z = depth (how far FORWARD — what we divide by during projection)
     """
     # Camera is at origin, so no position subtraction needed in this lesson.
+    # Keeping `rel` explicit mirrors Lesson 5, where camera position is dynamic.
     rel = world_point   # will become: world_point.sub(camera_pos) in Lesson 5
 
     return Vec3(
@@ -191,6 +192,7 @@ while running:
     if keys[pygame.K_DOWN]:  pitch -= TURN_SPEED * dt
 
     # Clamp pitch so the camera doesn't flip upside down
+    # Near +/- 90° the basis becomes unstable for this simple Euler setup.
     pitch = max(-MAX_PITCH, min(MAX_PITCH, pitch))
 
     # ---- Recompute camera basis ----
@@ -221,6 +223,7 @@ while running:
         cam_pt = world_to_camera(planet["pos"], forward, right, up)
         proj   = project(cam_pt)
         if proj:
+            # Store camera-space z as sort key for draw order.
             projected.append((cam_pt.z, planet, proj))
 
     projected.sort(reverse=True)    # farthest first (largest z first)

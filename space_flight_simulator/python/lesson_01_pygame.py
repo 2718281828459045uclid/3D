@@ -50,6 +50,26 @@ font_small = pygame.font.SysFont("Courier New", 12)
 # This is the same as HTML canvas (Lesson 1 in JavaScript).
 # In 3D (Lesson 3+) world-y will go UPWARD; we'll flip it during projection.
 
+def draw_axes(surface, font, ox, oy):
+    """Draw a small X/Y axis diagram at (ox, oy) to illustrate coordinate directions."""
+    length = 38
+
+    # X axis → RIGHT (positive x = right)
+    pygame.draw.line(surface, (255, 100, 100), (ox, oy), (ox + length, oy), 2)
+    lbl = font.render("x+", True, (255, 100, 100))
+    surface.blit(lbl, (ox + length + 3, oy - 6))
+
+    # Y axis ↓ DOWN (positive y = down — opposite of math class)
+    pygame.draw.line(surface, (100, 255, 136), (ox, oy), (ox, oy + length), 2)
+    lbl = font.render("y+", True, (100, 255, 136))
+    surface.blit(lbl, (ox - 4, oy + length + 3))
+
+    # Origin dot
+    pygame.draw.circle(surface, (255, 255, 255), (ox, oy), 3)
+
+    lbl = font.render("(0,0) top-left", True, (130, 150, 180))
+    surface.blit(lbl, (ox + 6, oy - 16))
+
 
 # ============================================================
 # STARS
@@ -120,10 +140,12 @@ while running:
     # --- UPDATE ---
     # Move the ship by velocity × dt.  Same formula as the JavaScript version:
     #   position += velocity * dt
+    # Because velocity is in px/sec and dt is in sec, the result is pixels.
     ship_x += ship_vx * dt
     ship_y += ship_vy * dt
 
     # Wrap around the edges (toroidal space)
+    # This keeps motion continuous: exiting one side enters opposite side.
     if ship_x > WIDTH:  ship_x -= WIDTH
     if ship_x < 0:      ship_x += WIDTH
     if ship_y > HEIGHT: ship_y -= HEIGHT
@@ -184,6 +206,7 @@ while running:
     screen.blit(label, (sx + 10, sy - 6))
 
     # Coordinate axis diagram
+    # Drawn each frame so it stays visible after clear/fill.
     draw_axes(screen, font_small, 30, 420)
 
     # Mouse position
@@ -198,29 +221,7 @@ while running:
     pygame.display.flip()
 
 
+
+
 pygame.quit()
 sys.exit()
-
-
-# ============================================================
-# HELPER: draw coordinate axis diagram
-# ============================================================
-def draw_axes(surface, font, ox, oy):
-    """Draw a small X/Y axis diagram at (ox, oy) to illustrate coordinate directions."""
-    length = 38
-
-    # X axis → RIGHT (positive x = right)
-    pygame.draw.line(surface, (255, 100, 100), (ox, oy), (ox + length, oy), 2)
-    lbl = font.render("x+", True, (255, 100, 100))
-    surface.blit(lbl, (ox + length + 3, oy - 6))
-
-    # Y axis ↓ DOWN (positive y = down — opposite of math class)
-    pygame.draw.line(surface, (100, 255, 136), (ox, oy), (ox, oy + length), 2)
-    lbl = font.render("y+", True, (100, 255, 136))
-    surface.blit(lbl, (ox - 4, oy + length + 3))
-
-    # Origin dot
-    pygame.draw.circle(surface, (255, 255, 255), (ox, oy), 3)
-
-    lbl = font.render("(0,0) top-left", True, (130, 150, 180))
-    surface.blit(lbl, (ox + 6, oy - 16))
